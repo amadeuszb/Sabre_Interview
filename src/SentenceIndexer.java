@@ -1,4 +1,9 @@
-import java.util.*;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 class SentenceIndexer {
 
@@ -15,19 +20,21 @@ class SentenceIndexer {
                 .split(whiteCharactersRegex);
         Set<String> words = new TreeSet<>(Arrays.asList(wordsArray));
         Map<Character, TreeSet<String>> mapOfCharacters = getMapOfAllCharacters(sentence);
-        words.forEach(
-                word -> word
-                        .chars()
-                        .distinct()
-                        .forEach(c -> addToMap(mapOfCharacters, word, (char) (c)))
-        );
+        words.forEach(word -> addWordToMap(mapOfCharacters, word));
         printResult(mapOfCharacters);
+    }
+
+    private void addWordToMap(Map<Character, TreeSet<String>> mapOfCharacters, String word) {
+        word
+                .chars()
+                .distinct()
+                .forEach(c -> addToMap(mapOfCharacters, word, (char) (c)));
     }
 
     private void printResult(Map<Character, TreeSet<String>> mapOfCharacters) {
         mapOfCharacters
                 .keySet()
-                .forEach(k -> System.out.println(k + " : " + mapOfCharacters.get(k)));
+                .forEach(key -> System.out.println(key + " : " + mapOfCharacters.get(key)));
     }
 
     private void addToMap(Map<Character, TreeSet<String>> map, String word, Character c) {
@@ -35,13 +42,11 @@ class SentenceIndexer {
     }
 
     private Map<Character, TreeSet<String>> getMapOfAllCharacters(String allCharacters) {
-        char[] tableOfAllChars = allCharacters
+        return allCharacters
                 .replaceAll(whiteCharactersRegex, "")
-                .toCharArray();
-        Map<Character, TreeSet<String>> setOfCharacters = new HashMap<>();
-        for (char c : tableOfAllChars) {
-            setOfCharacters.put(c, new TreeSet<>());
-        }
-        return setOfCharacters;
+                .chars()
+                .mapToObj(c -> (char) c)
+                .distinct()
+                .collect(Collectors.toMap(Function.identity(), i -> new TreeSet<>()));
     }
 }
