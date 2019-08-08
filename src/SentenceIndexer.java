@@ -3,6 +3,7 @@ import java.util.*;
 class SentenceIndexer {
 
     private String sentence;
+    private String whiteCharactersRegex = "\\s*(,|\\s)\\s*";
 
     SentenceIndexer(String sentence) {
         this.sentence = sentence;
@@ -11,12 +12,14 @@ class SentenceIndexer {
     void indexSentence() {
         sentence = sentence.toLowerCase();
         String[] wordsArray = sentence
-                .split("\\s*(,|\\s)\\s*");
+                .split(whiteCharactersRegex);
         Set<String> words = new TreeSet<>(Arrays.asList(wordsArray));
         Map<Character, TreeSet<String>> mapOfCharacters = getMapOfAllCharacters(sentence);
         words.forEach(
-                word ->
-                        word.chars().distinct().forEach(c -> addToMap(mapOfCharacters, word, (char) (c)))
+                word -> word
+                        .chars()
+                        .distinct()
+                        .forEach(c -> addToMap(mapOfCharacters, word, (char) (c)))
         );
         printResult(mapOfCharacters);
     }
@@ -31,9 +34,9 @@ class SentenceIndexer {
         map.getOrDefault(c, new TreeSet<>()).add(word);
     }
 
-    private static Map<Character, TreeSet<String>> getMapOfAllCharacters(String allCharacters) {
+    private Map<Character, TreeSet<String>> getMapOfAllCharacters(String allCharacters) {
         char[] tableOfAllChars = allCharacters
-                .replaceAll("\\s*(,|\\s)\\s*", "")
+                .replaceAll(whiteCharactersRegex, "")
                 .toCharArray();
         Map<Character, TreeSet<String>> setOfCharacters = new HashMap<>();
         for (char c : tableOfAllChars) {
