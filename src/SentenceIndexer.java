@@ -1,52 +1,60 @@
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 class SentenceIndexer {
-
-    private String sentence;
     private String whiteCharactersRegex = "\\s*(,|\\s)\\s*";
+    private String emptyString = "";
 
-    SentenceIndexer(String sentence) {
-        this.sentence = sentence;
+    String indexSentence(String sentence) {
+        Optional<String> sentenceOptional = Optional.ofNullable(sentence);
+        if (sentenceOptional.isPresent()) {
+            sentence = sentence.toLowerCase();
+            String[] wordsArray = sentence
+                    .split(whiteCharactersRegex);
+            Set<String> words = new TreeSet<>(Arrays.asList(wordsArray));
+            Map<Character, TreeSet<String>> mapOfCharacters = getMapWithAllCharactersAsKey(sentence);
+            words.forEach(word -> addWordToMap(mapOfCharacters, word));
+            return mapToString(mapOfCharacters);
+        } else return emptyString;
     }
 
-    void indexSentence() {
-        sentence = sentence.toLowerCase();
-        String[] wordsArray = sentence
-                .split(whiteCharactersRegex);
-        Set<String> words = new TreeSet<>(Arrays.asList(wordsArray));
-        Map<Character, TreeSet<String>> mapOfCharacters = getMapOfAllCharacters(sentence);
-        words.forEach(word -> addWordToMap(mapOfCharacters, word));
-        printResult(mapOfCharacters);
+    void printIndexedSentence(String sentence) { //TODO Logger ,white chars
+        System.out.print(indexSentence(sentence));
+    }
+
+    private String mapToString(Map<Character, TreeSet<String>> indexedMap) {
+        return indexedMap
+                .keySet()
+                .stream()
+                .map(key -> key + ": " + indexedMap.get(key))
+                .collect(Collectors.joining())
+                .replaceAll("\\[", emptyString)
+                .replaceAll("]", "\n");
     }
 
     private void addWordToMap(Map<Character, TreeSet<String>> mapOfCharacters, String word) {
         word
                 .chars()
                 .distinct()
-                .forEach(c -> addToMap(mapOfCharacters, word, (char) (c)));
+                .forEach(c -> addElementToMap(mapOfCharacters, word, (char) (c)));
     }
 
-    private void printResult(Map<Character, TreeSet<String>> mapOfCharacters) {
+    private void addElementToMap(Map<Character, TreeSet<String>> mapOfCharacters, String word, Character c) {
         mapOfCharacters
-                .keySet()
-                .forEach(key -> System.out.println(key + " : " + mapOfCharacters.get(key)));
+                .getOrDefault(c, new TreeSet<>())
+                .add(word);
     }
 
-    private void addToMap(Map<Character, TreeSet<String>> map, String word, Character c) {
-        map.getOrDefault(c, new TreeSet<>()).add(word);
-    }
-
-    private Map<Character, TreeSet<String>> getMapOfAllCharacters(String allCharacters) {
+    private Map<Character, TreeSet<String>> getMapWithAllCharactersAsKey(String allCharacters) {
         return allCharacters
-                .replaceAll(whiteCharactersRegex, "")
+                .replaceAll(whiteCharactersRegex, emptyString)
                 .chars()
                 .mapToObj(c -> (char) c)
                 .distinct()
-                .collect(Collectors.toMap(Function.identity(), i -> new TreeSet<>()));
+                .collect(Collectors.toMap(Function.identity(),
+                        i -> new TreeSet<>(),
+                        (ghrPrevious, ghrNew) -> ghrNew,
+                        TreeMap::new));
     }
 }
