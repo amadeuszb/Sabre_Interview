@@ -1,8 +1,4 @@
 # Sabre_Interview
-Oczekiwany czas na dostarczenie zadania: w ciągu 3 dni roboczych.
-
-Jako rozwiązanie należy przesłać cały projekt w dowolnej formie.
-
  
 
 Write a Java program, which will index each letter in a text to words. Program does not have to take letter case into consideration. Words that occur many times in a text must be presented only once in output. List of words in which particular letter occurs, should be sorted alphabetically.
@@ -41,6 +37,4 @@ v: javie
 
 w: w
 
- 
 
-Na rozwiązania oczekuję do poniedziałku rano tj. 12.08.2019 o godzinie 11:00.
