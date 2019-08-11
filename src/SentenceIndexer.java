@@ -3,24 +3,28 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 class SentenceIndexer {
-    private String whiteCharactersRegex = "\\s*(,|\\s)\\s*";
+    private String spaceString = " ";
     private String emptyString = "";
+    private String onlyLettersRegex = "[^a-zA-Z\\s+]";
 
-    String indexSentence(String sentence) {
-        Optional<String> sentenceOptional = Optional.ofNullable(sentence);
-        if (sentenceOptional.isPresent()) {
-            sentence = sentence.toLowerCase();
-            String[] wordsArray = sentence
-                    .split(whiteCharactersRegex);
-            Set<String> words = new TreeSet<>(Arrays.asList(wordsArray));
-            Map<Character, TreeSet<String>> mapOfCharacters = getMapWithAllCharactersAsKey(sentence);
-            words.forEach(word -> addWordToMap(mapOfCharacters, word));
-            return mapToString(mapOfCharacters);
-        } else return emptyString;
+    String indexCharactersToWords(String sentence) {
+        return Optional.ofNullable(sentence)
+                .map(this::indexCharacters)
+                .orElseGet(() -> emptyString);
     }
 
-    void printIndexedSentence(String sentence) { //TODO Logger ,white chars
-        System.out.print(indexSentence(sentence));
+    private String indexCharacters(String sentence) {
+        sentence = sentence.toLowerCase()
+                .replaceAll(onlyLettersRegex, emptyString);
+        String[] arrayWithAllWords = sentence
+                .split(spaceString);
+        Map<Character, TreeSet<String>> mapOfPresentCharacters = getMapWithAllCharactersAsKey(sentence);
+        new TreeSet<>(Arrays.asList(arrayWithAllWords)).forEach(word -> addWordToMap(mapOfPresentCharacters, word));
+        return mapToString(mapOfPresentCharacters);
+    }
+
+    void printIndexedSentence(String sentence) {
+        System.out.print(indexCharactersToWords(sentence));
     }
 
     private String mapToString(Map<Character, TreeSet<String>> indexedMap) {
@@ -48,7 +52,7 @@ class SentenceIndexer {
 
     private Map<Character, TreeSet<String>> getMapWithAllCharactersAsKey(String allCharacters) {
         return allCharacters
-                .replaceAll(whiteCharactersRegex, emptyString)
+                .replaceAll(spaceString, emptyString)
                 .chars()
                 .mapToObj(c -> (char) c)
                 .distinct()
